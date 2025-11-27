@@ -45,6 +45,16 @@ public func asyncEval(_ arrays: some Collection<MLXArray>) {
     mlx_vector_array_free(vector_array)
 }
 
+/// Pause evaluation
+public func pauseEval() {
+    evalLock.lock()
+}
+
+/// Resume evaluation
+public func resumeEval() {
+    evalLock.unlock()
+}
+
 /// Evaluate one or more `MLXArray`.
 ///
 /// This variant allows several structured types:
