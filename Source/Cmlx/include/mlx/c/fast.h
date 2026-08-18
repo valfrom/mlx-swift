@@ -176,6 +176,16 @@ int mlx_fast_rope(
     int offset,
     const mlx_array freqs /* may be null */,
     const mlx_stream s);
+int mlx_fast_rope_dynamic(
+    mlx_array* res,
+    const mlx_array x,
+    int dims,
+    bool traditional,
+    mlx_optional_float base,
+    float scale,
+    const mlx_array offset,
+    const mlx_array freqs /* may be null */,
+    const mlx_stream s);
 int mlx_fast_scaled_dot_product_attention(
     mlx_array* res,
     const mlx_array queries,
@@ -183,9 +193,10 @@ int mlx_fast_scaled_dot_product_attention(
     const mlx_array values,
     float scale,
     const char* mask_mode,
-    const mlx_vector_array mask_arrs,
+    const mlx_array mask_arr /* may be null */,
     const mlx_array sinks /* may be null */,
     const mlx_stream s);
+
 /**@}*/
 
 #ifdef __cplusplus

@@ -125,7 +125,7 @@ public final class Stream: @unchecked Sendable, Equatable {
 
     /// New stream on the given device.
     ///
-    /// See also ``withNewDefaultStream(device:_:)``
+    /// See also ``withNewDefaultStream(device:_:)-5bwc3``
     public init(_ device: Device) {
         self.ctx = evalLock.withLock {
             mlx_stream_new_device(device.ctx)
@@ -140,7 +140,9 @@ public final class Stream: @unchecked Sendable, Equatable {
 
     /// Synchronize with the given stream
     public func synchronize() {
-        mlx_synchronize(ctx)
+        _ = evalLock.withLock {
+            mlx_synchronize(ctx)
+        }
     }
 
     static public func defaultStream(_ device: Device) -> Stream {

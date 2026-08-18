@@ -37,6 +37,43 @@ public enum MLXFast {
         return MLXArray(result)
     }
 
+    /// Optimized implementation of `NN.RoPE` with array offset for batched inference.
+    ///
+    /// This overload accepts an array offset, allowing different position offsets for each
+    /// sequence in a batch. The offset can be a scalar array or a vector with length
+    /// matching the batch size.
+    ///
+    /// - Parameters:
+    ///   - array: input array
+    ///   - dimensions: The feature dimensions to be rotated. If the input feature is larger
+    ///     than dims then the rest is left unchanged.
+    ///   - traditional: If `true` choose the traditional implementation which is slightly less efficient.
+    ///   - base: The base used to compute angular frequency for each dimension in the positional encodings.
+    ///   - scale: The scale used to scale the positions.
+    ///   - offset: The position offset as an array. Can be a scalar or a vector of offsets for each batch element.
+    ///   - freqs: Optional frequencies to use with RoPE.
+    ///   - stream: stream or device to evaluate on
+    /// - Returns: The input with rotary positional encoding applied.
+    public static func RoPE(
+        _ array: MLXArray,
+        dimensions: Int,
+        traditional: Bool,
+        base: Float?,
+        scale: Float,
+        offset: MLXArray,
+        freqs: MLXArray? = nil,
+        stream: StreamOrDevice = .default
+    ) -> MLXArray {
+        var result = mlx_array_new()
+        let base = mlx_optional_float(value: base ?? 0, has_value: base != nil)
+        let offset = offset
+        mlx_fast_rope_dynamic(
+            &result,
+            array.ctx, Int32(dimensions), traditional, base, scale, offset.ctx,
+            (freqs ?? .mlxNone).ctx, stream.ctx)
+        return MLXArray(result)
+    }
+
     /// A fast implementation of multi-head attention: `O = softmax(Q @ K.T, dim=-1) @ V`
     ///
     /// Supports [Multi-Head Attention](https://arxiv.org/abs/1706.03762), [Grouped Query Attention](https://arxiv.org/abs/2305.13245), and [Multi-Query Attention](https://arxiv.org/abs/1911.02150).
@@ -83,20 +120,12 @@ public enum MLXFast {
         sinks: MLXArray? = nil,
         memoryEfficientThreshold: Int? = nil, stream: StreamOrDevice = .default
     ) -> MLXArray {
-        let masks =
-            if let mask {
-                new_mlx_vector_array([mask])
-            } else {
-                mlx_vector_array_new()
-            }
-        defer { mlx_vector_array_free(masks) }
-
         var result = mlx_array_new()
 
         mlx_fast_scaled_dot_product_attention(
             &result,
             queries.ctx, keys.ctx, values.ctx, scale,
-            "", masks,
+            "", mask?.ctx ?? MLXArray.mlxNone.ctx,
             (sinks ?? .mlxNone).ctx,
             stream.ctx)
         return MLXArray(result)
@@ -105,22 +134,27 @@ public enum MLXFast {
     public enum ScaledDotProductAttentionMaskMode {
         case none
         case array(MLXArray)
+
+        @available(*, deprecated, message: "Use .array instead")
         case arrays([MLXArray])
         case causal
 
-        public var masks: [MLXArray]? {
+        public var mask: MLXArray? {
             switch self {
-            case .none: nil
-            case .array(let array): [array]
-            case .arrays(let arrays): arrays
-            case .causal: nil
+            case .none: return nil
+            case .array(let array): return array
+            case .arrays(let arrays):
+                precondition(arrays.count <= 1, "Only a single array is allowed")
+                return arrays.first
+            case .causal: return nil
             }
         }
 
         public var mode: String {
             switch self {
             case .none: ""
-            case .array, .arrays: ""
+            case .array: ""
+            case .arrays: ""
             case .causal: "causal"
             }
         }
@@ -174,18 +208,10 @@ public enum MLXFast {
     ) -> MLXArray {
         var result = mlx_array_new()
 
-        let masks =
-            if let masks = mask.masks {
-                new_mlx_vector_array(masks)
-            } else {
-                mlx_vector_array_new()
-            }
-        defer { mlx_vector_array_free(masks) }
-
         mlx_fast_scaled_dot_product_attention(
             &result,
             queries.ctx, keys.ctx, values.ctx, scale,
-            mask.mode, masks,
+            mask.mode, mask.mask?.ctx ?? MLXArray.mlxNone.ctx,
             (sinks ?? .mlxNone).ctx,
             stream.ctx)
         return MLXArray(result)
@@ -256,6 +282,19 @@ public enum MLXFast {
 /// > Note: `MLXNN.RoPE` uses this implementation internally.
 public func RoPE(
     _ array: MLXArray, dimensions: Int, traditional: Bool, base: Float?, scale: Float, offset: Int,
+    freqs: MLXArray? = nil, stream: StreamOrDevice = .default
+) -> MLXArray {
+    return MLXFast.RoPE(
+        array, dimensions: dimensions, traditional: traditional, base: base, scale: scale,
+        offset: offset, freqs: freqs, stream: stream)
+}
+
+/// Optimized implementation of `NN.RoPE` with array offset for batched inference.
+///
+/// > Note: `MLXNN.RoPE` uses this implementation internally.
+public func RoPE(
+    _ array: MLXArray, dimensions: Int, traditional: Bool, base: Float?, scale: Float,
+    offset: MLXArray,
     freqs: MLXArray? = nil, stream: StreamOrDevice = .default
 ) -> MLXArray {
     return MLXFast.RoPE(

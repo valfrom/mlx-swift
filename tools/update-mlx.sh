@@ -18,7 +18,7 @@ cp Source/Cmlx/mlx-c/mlx/c/*.h Source/Cmlx/include/mlx/c
 
 mkdir build
 cd build
-cmake ../Source/Cmlx/mlx -DMLX_METAL_JIT=ON -DMACOS_VERSION=14.0
+cmake ../Source/Cmlx/mlx -DMLX_METAL_JIT=ON -DMACOS_VERSION=14.0 -DMLX_ENABLE_NAX=1
 
 # run the cmake build to generate the source files
 cd mlx/backend/metal
@@ -30,15 +30,19 @@ make \
     conv \
     copy \
     fft \
-    fp4_quantized \
+    fp_quantized \
+    fp_quantized_nax \
     gather \
     gather_axis \
     gather_front \
     gemm \
+    gemm_nax \
     gemv_masked \
     hadamard \
     logsumexp \
+    masked_scatter \
     quantized \
+    quantized_nax \
     quantized_utils \
     reduce \
     reduce_utils \
@@ -47,13 +51,18 @@ make \
     scatter_axis \
     softmax \
     sort \
+    steel_attention \
+    steel_attention_nax \
     steel_conv \
     steel_conv_general \
     steel_gemm_fused \
+    steel_gemm_fused_nax \
     steel_gemm_gather \
+    steel_gemm_gather_nax \
     steel_gemm_masked \
     steel_gemm_segmented \
     steel_gemm_splitk \
+    steel_gemm_splitk_nax \
     ternary \
     ternary_ops \
     unary \
@@ -82,5 +91,5 @@ rm Source/Cmlx/mlx-generated/*.tmp
 # Update the headers
 ./tools/fix-metal-includes.sh
 
-# install the appropriate bf16 header
-cp Source/Cmlx/mlx-generated/metal/metal_3_0/bf16.h Source/Cmlx/mlx-generated/metal
+# prepare xcodeproj files
+./tools/update-mlx-xcodeproj.sh

@@ -2,7 +2,23 @@ namespace mlx::core::metal {
 
 const char* ternary() {
   return R"preamble(
-template <typename T, typename Op, int N = WorkPerThread<T>::n>
+// Copyright © 2025 Apple Inc.
+
+// Auto generated source for mlx/backend/metal/kernels/ternary.h
+
+///////////////////////////////////////////////////////////////////////////////
+// Contents from "mlx/backend/metal/kernels/ternary.h"
+///////////////////////////////////////////////////////////////////////////////
+
+#line 1 "mlx/backend/metal/kernels/ternary.h"
+// Copyright © 2024 Apple Inc.
+
+template <
+    typename T,
+    typename Op,
+    bool BSCALAR,
+    bool CSCALAR,
+    int N = WorkPerThread<T>::n>
 [[kernel]] void ternary_v(
     device const bool* a,
     device const T* b,
@@ -13,15 +29,25 @@ template <typename T, typename Op, int N = WorkPerThread<T>::n>
   index *= N;
   if (N > 1 && index + N > size) {
     for (int i = 0; index + i < size; ++i) {
-      d[index + i] = Op()(a[index + i], b[index + i], c[index + i]);
+      auto bidx = BSCALAR ? 0 : index + i;
+      auto cidx = CSCALAR ? 0 : index + i;
+      d[index + i] = Op()(a[index + i], b[bidx], c[cidx]);
     }
   } else {
     for (int i = 0; i < N; ++i) {
-      d[index + i] = Op()(a[index + i], b[index + i], c[index + i]);
+      auto bidx = BSCALAR ? 0 : index + i;
+      auto cidx = CSCALAR ? 0 : index + i;
+      d[index + i] = Op()(a[index + i], b[bidx], c[cidx]);
     }
   }
 }
-template <typename T, typename Op, int N = WorkPerThread<T>::n>
+
+template <
+    typename T,
+    typename Op,
+    bool BSCALAR,
+    bool CSCALAR,
+    int N = WorkPerThread<T>::n>
 [[kernel]] void ternary_v2(
     device const bool* a,
     device const T* b,
@@ -33,14 +59,19 @@ template <typename T, typename Op, int N = WorkPerThread<T>::n>
   int64_t offset = N * (index.x + grid_dim.x * int64_t(index.y));
   if (N > 1 && offset + N > size) {
     for (int i = 0; offset + i < size; ++i) {
-      d[offset + i] = Op()(a[offset + i], b[offset + i], c[offset + i]);
+      auto bidx = BSCALAR ? 0 : offset + i;
+      auto cidx = CSCALAR ? 0 : offset + i;
+      d[offset + i] = Op()(a[offset + i], b[bidx], c[cidx]);
     }
   } else {
     for (int i = 0; i < N; ++i) {
-      d[offset + i] = Op()(a[offset + i], b[offset + i], c[offset + i]);
+      auto bidx = BSCALAR ? 0 : offset + i;
+      auto cidx = CSCALAR ? 0 : offset + i;
+      d[offset + i] = Op()(a[offset + i], b[bidx], c[cidx]);
     }
   }
 }
+
 template <typename T, typename Op, typename IdxT = int64_t>
 [[kernel]] void ternary_g_nd1(
     device const bool* a,
@@ -56,6 +87,7 @@ template <typename T, typename Op, typename IdxT = int64_t>
   auto c_idx = elem_to_loc_1<IdxT>(index, c_strides);
   d[index] = Op()(a[a_idx], b[b_idx], c[c_idx]);
 }
+
 template <typename T, typename Op, typename IdxT = int64_t>
 [[kernel]] void ternary_g_nd2(
     device const bool* a,
@@ -73,6 +105,7 @@ template <typename T, typename Op, typename IdxT = int64_t>
   IdxT out_idx = index.x + IdxT(grid_dim.x) * index.y;
   d[out_idx] = Op()(a[a_idx], b[b_idx], c[c_idx]);
 }
+
 template <typename T, typename Op, typename IdxT = int64_t>
 [[kernel]] void ternary_g_nd3(
     device const bool* a,
@@ -90,6 +123,7 @@ template <typename T, typename Op, typename IdxT = int64_t>
   IdxT out_idx = index.x + grid_dim.x * (index.y + IdxT(grid_dim.y) * index.z);
   d[out_idx] = Op()(a[a_idx], b[b_idx], c[c_idx]);
 }
+
 template <typename T, typename Op, int N = 1, typename IdxT = int64_t>
 [[kernel]] void ternary_g(
     device const bool* a,
@@ -122,6 +156,8 @@ template <typename T, typename Op, int N = 1, typename IdxT = int64_t>
     idx.z += c_xstride;
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 )preamble";
 }
 

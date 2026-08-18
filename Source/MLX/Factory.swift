@@ -22,8 +22,9 @@ extension MLXArray {
     /// - <doc:initialization>
     /// - ``zeros(like:stream:)``
     /// - ``ones(_:type:stream:)``
-    static public func zeros<T: HasDType>(
-        _ shape: [Int], type: T.Type = Float.self, stream: StreamOrDevice = .default
+    static public func zeros(
+        _ shape: some Collection<Int>, type: (some HasDType).Type = Float.self,
+        stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.zeros(shape, type: type, stream: stream)
     }
@@ -46,7 +47,7 @@ extension MLXArray {
     /// - ``zeros(like:stream:)``
     /// - ``ones(_:type:stream:)``
     static public func zeros(
-        _ shape: [Int], dtype: DType = .float32, stream: StreamOrDevice = .default
+        _ shape: some Collection<Int>, dtype: DType, stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.zeros(shape, dtype: dtype, stream: stream)
     }
@@ -89,8 +90,9 @@ extension MLXArray {
     /// - <doc:initialization>
     /// - ``ones(like:stream:)``
     /// - ``zeros(_:type:stream:)``
-    static public func ones<T: HasDType>(
-        _ shape: [Int], type: T.Type = Float.self, stream: StreamOrDevice = .default
+    static public func ones(
+        _ shape: some Collection<Int>, type: (some HasDType).Type = Float.self,
+        stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.ones(shape, type: type, stream: stream)
     }
@@ -113,7 +115,7 @@ extension MLXArray {
     /// - ``ones(like:stream:)``
     /// - ``zeros(_:type:stream:)``
     static public func ones(
-        _ shape: [Int], dtype: DType = .float32, stream: StreamOrDevice = .default
+        _ shape: some Collection<Int>, dtype: DType, stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.ones(shape, dtype: dtype, stream: stream)
     }
@@ -158,8 +160,8 @@ extension MLXArray {
     /// ### See Also
     /// - <doc:initialization>
     /// - ``identity(_:type:stream:)``
-    static public func eye<T: HasDType>(
-        _ n: Int, m: Int? = nil, k: Int = 0, type: T.Type = Float.self,
+    static public func eye(
+        _ n: Int, m: Int? = nil, k: Int = 0, type: (some HasDType).Type = Float.self,
         stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.eye(n, m: m, k: k, type: type, stream: stream)
@@ -185,8 +187,7 @@ extension MLXArray {
     /// - <doc:initialization>
     /// - ``identity(_:type:stream:)``
     static public func eye(
-        _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType = .float32,
-        stream: StreamOrDevice = .default
+        _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType, stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.eye(n, m: m, k: k, dtype: dtype, stream: stream)
     }
@@ -213,8 +214,9 @@ extension MLXArray {
     /// - <doc:initialization>
     /// - ``full(_:values:stream:)``
     /// - ``repeated(_:count:axis:stream:)``
-    static public func full<T: HasDType>(
-        _ shape: [Int], values: MLXArray, type: T.Type, stream: StreamOrDevice = .default
+    static public func full(
+        _ shape: some Collection<Int>, values: MLXArray, type: (some HasDType).Type = Float.self,
+        stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.full(shape, values: values, type: type, stream: stream)
     }
@@ -242,7 +244,8 @@ extension MLXArray {
     /// - ``full(_:values:stream:)``
     /// - ``repeated(_:count:axis:stream:)``
     static public func full(
-        _ shape: [Int], values: MLXArray, dtype: DType = .float32, stream: StreamOrDevice = .default
+        _ shape: some Collection<Int>, values: MLXArray, dtype: DType,
+        stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.full(shape, values: values, dtype: dtype, stream: stream)
     }
@@ -268,7 +271,9 @@ extension MLXArray {
     /// - <doc:initialization>
     /// - ``full(_:values:type:stream:)``
     /// - ``repeated(_:count:axis:stream:)``
-    static public func full(_ shape: [Int], values: MLXArray, stream: StreamOrDevice = .default)
+    static public func full(
+        _ shape: some Collection<Int>, values: MLXArray, stream: StreamOrDevice = .default
+    )
         -> MLXArray
     {
         MLX.full(shape, values: values, stream: stream)
@@ -291,8 +296,8 @@ extension MLXArray {
     /// ### See Also
     /// - <doc:initialization>
     /// - ``eye(_:m:k:type:stream:)``
-    static public func identity<T: HasDType>(
-        _ n: Int, type: T.Type = Float.self, stream: StreamOrDevice = .default
+    static public func identity(
+        _ n: Int, type: (some HasDType).Type = Float.self, stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.identity(n, type: type, stream: stream)
     }
@@ -314,9 +319,9 @@ extension MLXArray {
     /// ### See Also
     /// - <doc:initialization>
     /// - ``eye(_:m:k:type:stream:)``
-    static public func identity(
-        _ n: Int, dtype: DType = .float32, stream: StreamOrDevice = .default
-    ) -> MLXArray {
+    static public func identity(_ n: Int, dtype: DType, stream: StreamOrDevice = .default)
+        -> MLXArray
+    {
         MLX.identity(n, dtype: dtype, stream: stream)
     }
 
@@ -366,6 +371,147 @@ extension MLXArray {
         _ start: T, _ stop: T, count: Int = 50, stream: StreamOrDevice = .default
     ) -> MLXArray where T: BinaryFloatingPoint {
         MLX.linspace(start, stop, count: count, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[0, stop)`.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    /// let r = MLXArray.arange(10)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - stop: stop value
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:_:step:stream:)``
+    static public func arange(_ stop: Int, stream: StreamOrDevice = .default) -> MLXArray {
+        MLX.arange(0, stop, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[start, stop)` spaced by `step`.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [2, 4, 6, 8]
+    /// let r = MLXArray.arange(2, 10, step: 2)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - start: start value
+    ///     - stop: stop value
+    ///     - step: step size (default: 1)
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:_:step:dtype:stream:)-(Int,_,_,_,_)``
+    static public func arange(
+        _ start: Int, _ stop: Int, step: Int = 1, stream: StreamOrDevice = .default
+    ) -> MLXArray {
+        MLX.arange(start, stop, step: step, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[0, stop)` with a given ``DType``.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [0.0, 1.0, 2.0, ...] as float32
+    /// let r = MLXArray.arange(10, dtype: .float32)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - stop: stop value
+    ///     - dtype: data type of the output array
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:_:step:dtype:stream:)-(Int,_,_,_,_)``
+    static public func arange(_ stop: Int, dtype: DType, stream: StreamOrDevice = .default)
+        -> MLXArray
+    {
+        MLX.arange(0, stop, dtype: dtype, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[start, stop)` spaced by `step` with a given ``DType``.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [2.0, 4.0, 6.0, 8.0] as float32
+    /// let r = MLXArray.arange(2, 10, step: 2, dtype: .float32)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - start: start value
+    ///     - stop: stop value
+    ///     - step: step size (default: 1)
+    ///     - dtype: data type of the output array
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:_:step:stream:)``
+    static public func arange(
+        _ start: Int, _ stop: Int, step: Int = 1, dtype: DType, stream: StreamOrDevice = .default
+    ) -> MLXArray {
+        MLX.arange(start, stop, step: step, dtype: dtype, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[0, stop)` (floating point version).
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [0.0, 1.0, 2.0, 3.0, 4.0]
+    /// let r = MLXArray.arange(5.0)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - stop: stop value
+    ///     - dtype: data type of the output array (default: .float32)
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:_:step:dtype:stream:)-(Double,_,_,_,_)``
+    static public func arange(
+        _ stop: Double, dtype: DType = .float32, stream: StreamOrDevice = .default
+    ) -> MLXArray {
+        MLX.arange(stop, dtype: dtype, stream: stream)
+    }
+
+    /// Generate values in the half-open interval `[start, stop)` spaced by `step` (floating point version).
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // Create [0.0, 0.5, 1.0, 1.5, 2.0, ...]
+    /// let r = MLXArray.arange(0.0, 5.0, step: 0.5)
+    /// ```
+    ///
+    /// - Parameters:
+    ///     - start: start value
+    ///     - stop: stop value
+    ///     - step: step size (default: 1.0)
+    ///     - dtype: data type of the output array (default: .float32)
+    ///     - stream: stream or device to evaluate on
+    ///
+    /// ### See Also
+    /// - <doc:initialization>
+    /// - ``arange(_:dtype:stream:)-(Double,_,_)``
+    static public func arange(
+        _ start: Double, _ stop: Double, step: Double = 1.0, dtype: DType = .float32,
+        stream: StreamOrDevice = .default
+    ) -> MLXArray {
+        MLX.arange(start, stop, step: step, dtype: dtype, stream: stream)
     }
 
     /// Repeat an array along a specified axis.
@@ -465,8 +611,8 @@ extension MLXArray {
     ///
     /// ### See Also
     /// - <doc:initialization>
-    static public func tri<T: HasDType>(
-        _ n: Int, m: Int? = nil, k: Int = 0, type: T.Type = Float.self,
+    static public func tri(
+        _ n: Int, m: Int? = nil, k: Int = 0, type: (some HasDType).Type = Float.self,
         stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.tri(n, m: m, k: k, type: type, stream: stream)
@@ -491,8 +637,7 @@ extension MLXArray {
     /// ### See Also
     /// - <doc:initialization>
     static public func tri(
-        _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType = .float32,
-        stream: StreamOrDevice = .default
+        _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType, stream: StreamOrDevice = .default
     ) -> MLXArray {
         MLX.tri(n, m: m, k: k, dtype: dtype, stream: stream)
     }
@@ -516,11 +661,12 @@ extension MLXArray {
 /// - <doc:initialization>
 /// - ``zeros(like:stream:)``
 /// - ``ones(_:type:stream:)``
-public func zeros<T: HasDType>(
-    _ shape: [Int], type: T.Type = Float.self, stream: StreamOrDevice = .default
+public func zeros(
+    _ shape: some Collection<Int>, type: (some HasDType).Type = Float.self,
+    stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
-    mlx_zeros(&result, shape.map { Int32($0) }, shape.count, T.dtype.cmlxDtype, stream.ctx)
+    mlx_zeros(&result, shape.map { Int32($0) }, shape.count, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -542,7 +688,7 @@ public func zeros<T: HasDType>(
 /// - ``zeros(like:stream:)``
 /// - ``ones(_:type:stream:)``
 public func zeros(
-    _ shape: [Int], dtype: DType = .float32, stream: StreamOrDevice = .default
+    _ shape: some Collection<Int>, dtype: DType, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     mlx_zeros(&result, shape.map { Int32($0) }, shape.count, dtype.cmlxDtype, stream.ctx)
@@ -589,11 +735,12 @@ public func zeros(like array: MLXArray, stream: StreamOrDevice = .default) -> ML
 /// - <doc:initialization>
 /// - ``ones(like:stream:)``
 /// - ``zeros(_:type:stream:)``
-public func ones<T: HasDType>(
-    _ shape: [Int], type: T.Type = Float.self, stream: StreamOrDevice = .default
+public func ones(
+    _ shape: some Collection<Int>, type: (some HasDType).Type = Float.self,
+    stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
-    mlx_ones(&result, shape.map { Int32($0) }, shape.count, T.dtype.cmlxDtype, stream.ctx)
+    mlx_ones(&result, shape.map { Int32($0) }, shape.count, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -615,7 +762,7 @@ public func ones<T: HasDType>(
 /// - ``zeros(like:stream:)``
 /// - ``ones(_:type:stream:)``
 public func ones(
-    _ shape: [Int], dtype: DType = .float32, stream: StreamOrDevice = .default
+    _ shape: some Collection<Int>, dtype: DType, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     mlx_ones(&result, shape.map { Int32($0) }, shape.count, dtype.cmlxDtype, stream.ctx)
@@ -664,12 +811,12 @@ public func ones(like array: MLXArray, stream: StreamOrDevice = .default) -> MLX
 /// ### See Also
 /// - <doc:initialization>
 /// - ``identity(_:type:stream:)``
-public func eye<T: HasDType>(
-    _ n: Int, m: Int? = nil, k: Int = 0, type: T.Type = Float.self,
+public func eye(
+    _ n: Int, m: Int? = nil, k: Int = 0, type: (some HasDType).Type = Float.self,
     stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
-    mlx_eye(&result, n.int32, (m ?? n).int32, k.int32, T.dtype.cmlxDtype, stream.ctx)
+    mlx_eye(&result, n.int32, (m ?? n).int32, k.int32, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -693,8 +840,7 @@ public func eye<T: HasDType>(
 /// - <doc:initialization>
 /// - ``identity(_:type:stream:)``
 public func eye(
-    _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType = .float32,
-    stream: StreamOrDevice = .default
+    _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     mlx_eye(&result, n.int32, (m ?? n).int32, k.int32, dtype.cmlxDtype, stream.ctx)
@@ -723,12 +869,13 @@ public func eye(
 /// - <doc:initialization>
 /// - ``full(_:values:stream:)``
 /// - ``repeated(_:count:axis:stream:)``
-public func full<T: HasDType>(
-    _ shape: [Int], values: ScalarOrArray, type: T.Type, stream: StreamOrDevice = .default
+public func full(
+    _ shape: some Collection<Int>, values: some ScalarOrArray, type: (some HasDType).Type,
+    stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     let values = values.asMLXArray(dtype: nil)
-    mlx_full(&result, shape.asInt32, shape.count, values.ctx, T.dtype.cmlxDtype, stream.ctx)
+    mlx_full(&result, shape.asInt32, shape.count, values.ctx, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -755,8 +902,7 @@ public func full<T: HasDType>(
 /// - ``full(_:values:stream:)``
 /// - ``repeated(_:count:axis:stream:)``
 public func full(
-    _ shape: [Int], values: MLXArray, dtype: DType = .float32,
-    stream: StreamOrDevice = .default
+    _ shape: some Collection<Int>, values: MLXArray, dtype: DType, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     mlx_full(&result, shape.asInt32, shape.count, values.ctx, dtype.cmlxDtype, stream.ctx)
@@ -784,9 +930,9 @@ public func full(
 /// - <doc:initialization>
 /// - ``full(_:values:type:stream:)``
 /// - ``repeated(_:count:axis:stream:)``
-public func full(_ shape: [Int], values: ScalarOrArray, stream: StreamOrDevice = .default)
-    -> MLXArray
-{
+public func full(
+    _ shape: some Collection<Int>, values: some ScalarOrArray, stream: StreamOrDevice = .default
+) -> MLXArray {
     var result = mlx_array_new()
     let values = values.asMLXArray(dtype: nil)
     mlx_full(&result, shape.asInt32, shape.count, values.ctx, values.dtype.cmlxDtype, stream.ctx)
@@ -810,11 +956,11 @@ public func full(_ shape: [Int], values: ScalarOrArray, stream: StreamOrDevice =
 /// ### See Also
 /// - <doc:initialization>
 /// - ``eye(_:m:k:type:stream:)``
-public func identity<T: HasDType>(
-    _ n: Int, type: T.Type = Float.self, stream: StreamOrDevice = .default
+public func identity(
+    _ n: Int, type: (some HasDType).Type = Float.self, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
-    mlx_identity(&result, n.int32, T.dtype.cmlxDtype, stream.ctx)
+    mlx_identity(&result, n.int32, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -835,9 +981,7 @@ public func identity<T: HasDType>(
 /// ### See Also
 /// - <doc:initialization>
 /// - ``eye(_:m:k:type:stream:)``
-public func identity(
-    _ n: Int, dtype: DType = .float32, stream: StreamOrDevice = .default
-) -> MLXArray {
+public func identity(_ n: Int, dtype: DType, stream: StreamOrDevice = .default) -> MLXArray {
     var result = mlx_array_new()
     mlx_identity(&result, n.int32, dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
@@ -892,6 +1036,158 @@ public func linspace<T: HasDType>(
 ) -> MLXArray where T: BinaryFloatingPoint {
     var result = mlx_array_new()
     mlx_linspace(&result, Double(start), Double(stop), count.int32, T.dtype.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[0, stop)`.
+///
+/// Example:
+///
+/// ```swift
+/// // Create [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/// let r = arange(10)
+/// ```
+///
+/// - Parameters:
+///     - stop: stop value
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:_:step:stream:)``
+public func arange(_ stop: Int, stream: StreamOrDevice = .default) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(&result, 0, Double(stop), 1, DType.int32.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[start, stop)` spaced by `step`.
+///
+/// Example:
+///
+/// ```swift
+/// // Create [2, 4, 6, 8]
+/// let r = arange(2, 10, step: 2)
+/// ```
+///
+/// - Parameters:
+///     - start: start value
+///     - stop: stop value
+///     - step: step size (default: 1)
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:_:step:dtype:stream:)-(Int,_,_,_,_)``
+public func arange(
+    _ start: Int, _ stop: Int, step: Int = 1, stream: StreamOrDevice = .default
+) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(
+        &result, Double(start), Double(stop), Double(step), DType.int32.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[0, stop)` with a given ``DType``.
+///
+/// Example:
+///
+/// ```swift
+/// // Create [0.0, 1.0, 2.0, ...] as float32
+/// let r = arange(10, dtype: .float32)
+/// ```
+///
+/// - Parameters:
+///     - stop: stop value
+///     - dtype: data type of the output array
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:_:step:dtype:stream:)-(Int,_,_,_,_)``
+public func arange(_ stop: Int, dtype: DType, stream: StreamOrDevice = .default) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(&result, 0, Double(stop), 1, dtype.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[start, stop)` spaced by `step` with a given ``DType``.
+///
+/// Example:
+///
+/// ```swift
+/// // Create [2.0, 4.0, 6.0, 8.0] as float32
+/// let r = arange(2, 10, step: 2, dtype: .float32)
+/// ```
+///
+/// - Parameters:
+///     - start: start value
+///     - stop: stop value
+///     - step: step size (default: 1)
+///     - dtype: data type of the output array
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:_:step:stream:)``
+public func arange(
+    _ start: Int, _ stop: Int, step: Int = 1, dtype: DType, stream: StreamOrDevice = .default
+) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(&result, Double(start), Double(stop), Double(step), dtype.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[0, stop)` (floating point version).
+///
+/// Example:
+///
+/// ```swift
+/// // Create [0.0, 1.0, 2.0, 3.0, 4.0]
+/// let r = arange(5.0)
+/// ```
+///
+/// - Parameters:
+///     - stop: stop value
+///     - dtype: data type of the output array (default: .float32)
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:_:step:dtype:stream:)-(Double,_,_,_,_)``
+public func arange(
+    _ stop: Double, dtype: DType = .float32, stream: StreamOrDevice = .default
+) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(&result, 0, stop, 1, dtype.cmlxDtype, stream.ctx)
+    return MLXArray(result)
+}
+
+/// Generate values in the half-open interval `[start, stop)` spaced by `step` (floating point version).
+///
+/// Example:
+///
+/// ```swift
+/// // Create [0.0, 0.5, 1.0, 1.5, 2.0, ...]
+/// let r = arange(0.0, 5.0, step: 0.5)
+/// ```
+///
+/// - Parameters:
+///     - start: start value
+///     - stop: stop value
+///     - step: step size (default: 1.0)
+///     - dtype: data type of the output array (default: .float32)
+///     - stream: stream or device to evaluate on
+///
+/// ### See Also
+/// - <doc:initialization>
+/// - ``arange(_:dtype:stream:)-(Double,_,_)``
+public func arange(
+    _ start: Double, _ stop: Double, step: Double = 1.0, dtype: DType = .float32,
+    stream: StreamOrDevice = .default
+) -> MLXArray {
+    var result = mlx_array_new()
+    mlx_arange(&result, start, stop, step, dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -996,12 +1292,12 @@ public func repeated(_ array: MLXArray, count: Int, stream: StreamOrDevice = .de
 ///
 /// ### See Also
 /// - <doc:initialization>
-public func tri<T: HasDType>(
-    _ n: Int, m: Int? = nil, k: Int = 0, type: T.Type = Float.self,
+public func tri(
+    _ n: Int, m: Int? = nil, k: Int = 0, type: (some HasDType).Type = Float.self,
     stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
-    mlx_tri(&result, n.int32, (m ?? n).int32, k.int32, T.dtype.cmlxDtype, stream.ctx)
+    mlx_tri(&result, n.int32, (m ?? n).int32, k.int32, type.dtype.cmlxDtype, stream.ctx)
     return MLXArray(result)
 }
 
@@ -1024,8 +1320,7 @@ public func tri<T: HasDType>(
 /// ### See Also
 /// - <doc:initialization>
 public func tri(
-    _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType = .float32,
-    stream: StreamOrDevice = .default
+    _ n: Int, m: Int? = nil, k: Int = 0, dtype: DType, stream: StreamOrDevice = .default
 ) -> MLXArray {
     var result = mlx_array_new()
     mlx_tri(&result, n.int32, (m ?? n).int32, k.int32, dtype.cmlxDtype, stream.ctx)

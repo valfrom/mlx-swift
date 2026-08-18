@@ -25,14 +25,14 @@ extension MLXRandom {
     ///
     /// ### See Also
     /// - ``globalState``
-    /// - ``withRandomState(_:body:)-6i2p1``
+    /// - ``withRandomState(_:body:)-18ob4``
     public class RandomState: RandomStateOrKey, Updatable, Evaluatable, @unchecked (Sendable) {
         private var state: MLXArray
         private let lock = NSLock()
 
         /// Initialize the RandomState with a seed based on the current time.
         public init() {
-            let now = mach_approximate_time()
+            let now = DispatchTime.now().uptimeNanoseconds
             state = MLXRandom.key(now)
         }
 
@@ -88,9 +88,9 @@ extension MLXRandom {
 /// random key:
 ///
 /// - the passed key, either an ``MLXArray`` or ``MLXRandom/RandomState``
-/// - the task-local ``MLXRandom/RandomState``, see ``withRandomState(_:body:)-6i2p1``
+/// - the task-local ``MLXRandom/RandomState``, see ``withRandomState(_:body:)-18ob4``
 /// - the global RandomState, ``MLXRandom/globalState``
-public func resolve(key: RandomStateOrKey?) -> MLXArray {
+public func resolve(key: (some RandomStateOrKey)? = MLXArray?.none) -> MLXArray {
     key?.asRandomKey() ?? MLXRandom.taskLocalRandomState?.asRandomKey()
         ?? MLXRandom.globalState.next()
 }

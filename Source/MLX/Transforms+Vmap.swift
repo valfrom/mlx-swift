@@ -16,8 +16,8 @@ import Foundation
 /// - <doc:vmap>
 public func vmap(
     _ f: @escaping ([MLXArray]) -> [MLXArray],
-    inAxes: [Int?] = [0],
-    outAxes: [Int?] = [0]
+    inAxes: some Sequence<Int?> = [0],
+    outAxes: some Sequence<Int?> = [0]
 ) -> ([MLXArray]) -> [MLXArray] {
     { arrays in
         let inAxes32 = inAxes.map { Int32($0 ?? -1) }
@@ -29,13 +29,16 @@ public func vmap(
         var traceInputs = mlx_vector_array_new()
         var traceOutputs = mlx_vector_array_new()
 
-        let closure = new_mlx_closure(f)
-        _ = inAxes32.withUnsafeBufferPointer { inAxesBuf in
-            mlx_detail_vmap_trace(
-                &traceInputs, &traceOutputs, closure, inputs, inAxesBuf.baseAddress, inAxesBuf.count
-            )
+        evalLock.withLock {
+            let closure = new_mlx_closure(f)
+            _ = inAxes32.withUnsafeBufferPointer { inAxesBuf in
+                mlx_detail_vmap_trace(
+                    &traceInputs, &traceOutputs, closure, inputs, inAxesBuf.baseAddress,
+                    inAxesBuf.count
+                )
+            }
+            mlx_closure_free(closure)
         }
-        mlx_closure_free(closure)
 
         defer {
             mlx_vector_array_free(traceInputs)

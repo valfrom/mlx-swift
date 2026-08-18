@@ -42,14 +42,28 @@ from MLX Python.
 
 ## Installation
 
-The ``MLX`` Swift package can be built and run from Xcode or SwiftPM. A CMake install is also provided.
+The ``MLX`` Swift package can be built and run from Xcode or SwiftPM. A CMake installation is also provided, featuring a native Linux build option.
 
 More details are in the [documentation](https://swiftpackageindex.com/ml-explore/mlx-swift/main/documentation/mlx/install).
 
-### Xcode
+### Xcode (1)
 
 In Xcode you can add `https://github.com/ml-explore/mlx-swift.git` as a package
 dependency and link `MLX`, `MLXNN`, `MLXOptimizers` and `MLXRandom` as needed.
+
+### XCode (2)
+
+Note that the SwiftPM and XCode (1) methods build `MLX` as a Library, not as a framework.
+It is possible to construct a situation where YourApp -> MLX, YourApp -> YourFramework
+and YourFramework -> MLX.  This would give two copies of MLX in the resulting process
+and it may not work as expected.
+
+If this cannot be avoided, either by making YourFramework a Library or having YourApp
+_not_ link MLX, you can use the `xcode/MLX.xcodeproj` to build MLX as a _Framework_.
+This will require `mlx-swift` to be checked out adjacent or inside your project,
+possibly using git submodules, and dragging the `mlx-swift/xcode/MLX.xcodeproj` into
+your project.  Once that is done your application can build and link MLX and related
+as Frameworks.
 
 ### SwiftPM
 
@@ -75,6 +89,17 @@ dependencies: [.product(name: "MLX", package: "mlx-swift"),
 
 ### xcodebuild
 
+**Update the submodules**
+
+The directories `Source/Cmlx/mlx` and `Source/Cmlx/mlx-c` are sourced as submodules. 
+Before you attempt to build the project locally, pull down the updates for those submodules:
+
+```shell
+git submodule update --init --recursive
+```
+
+**Use Xcode to build the binaries and metal shaders**
+
 Although `SwiftPM` (command line) cannot build the Metal shaders, `xcodebuild` can and
 it can be used to do command line builds:
 
@@ -88,6 +113,10 @@ xcodebuild build -scheme Tutorial -destination 'platform=OS X'
 
 ### CMake
 
+#### (1) macOS
+
+**Install Dependencies**
+
 Building with CMake requires both CMake and Ninja to be installed. You can do
 this with [Homebrew](https://brew.sh/):
 
@@ -96,15 +125,52 @@ brew install cmake
 brew install ninja
 ```
 
-With CMake:
+**Build + Run Examples**
+
+- The examples use the Metal GPU backend by default on macOS.
+- Note that the CUDA GPU backend is exclusive to Linux.
 
 ```shell
-mkdir build
+mkdir -p build
 cd build
 cmake .. -G Ninja
 ninja
 ./example1
 ./tutorial
+```
+
+#### (2) Linux
+
+**Install Dependencies**
+
+- To build the example binaries, install all dependencies listed in the CI [scripts](.github/scripts/).
+- Note: The CUDA GPU backend requires the CUDA toolkit and additional dependencies.
+- For Swift installation on Linux, visit [swift.org](https://www.swift.org/install/linux/).
+
+**Build + Run Examples (CPU backend)**
+
+On Linux, the examples use the CPU backend by default.
+
+```shell
+mkdir -p build
+pushd build
+cmake -DMLX_BUILD_METAL=OFF .. -G Ninja
+ninja
+./example1
+./tutorial
+popd
+```
+
+**Build + Run Examples (GPU CUDA backend)**
+
+```shell
+mkdir -p build
+pushd build
+cmake -DMLX_BUILD_METAL=OFF -DMLX_BUILD_CUDA=ON -DMLX_C_BUILD_EXAMPLES=OFF .. -G Ninja
+ninja
+./example1 --device gpu
+./tutorial --device gpu
+popd
 ```
 
 ## Contributing
