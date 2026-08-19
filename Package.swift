@@ -83,6 +83,7 @@ let noCudaCmlxExcludes = [
     let cxxSettings: [CXXSetting]
     let linkerSettings: [LinkerSetting]
     let mlxSwiftExcludes: [String]
+    let cmlxPlugins: [Target.PluginUsage] = [.plugin(name: "CudaBuild")]
 
     if Context.environment["SPM_CUDA"] != "0" {
         // Linux with CUDA
@@ -212,6 +213,7 @@ let noCudaCmlxExcludes = [
     let mlxSwiftExcludes: [String] = [
         "GPU+CUDA.swift"
     ]
+    let cmlxPlugins: [Target.PluginUsage] = []
 #endif
 
 let cmlx = Target.target(
@@ -289,9 +291,7 @@ let cmlx = Target.target(
         .define("MLX_VERSION", to: "\"0.31.1\""),
     ],
     linkerSettings: linkerSettings,
-    plugins: [
-        .plugin(name: "CudaBuild")
-    ],
+    plugins: cmlxPlugins,
 )
 
 let package = Package(
